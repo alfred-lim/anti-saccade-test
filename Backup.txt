@@ -1,0 +1,88 @@
+						// Get the parent layout of the PreviewView
+                        FrameLayout parentLayout = findViewById(R.id.preview_view);
+
+                        // Create a new LayoutParams object for the ImageView
+                        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.WRAP_CONTENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT
+                        );
+
+                        // Set the position of the ImageView
+                        params.gravity = Gravity.TOP | Gravity.START; // change these values to position the ImageView as needed
+
+                        // Set the size of the ImageView
+                        params.width = 400; // change this value to set the width of the ImageView
+                        params.height = 400; // change this value to set the height of the ImageView
+
+                        // Create a Bitmap
+                        eBitmap = previewView.getBitmap();
+                        eBitmap = getEyeBitmap(face, eBitmap);
+                        eBitmap = toGrayscale(eBitmap);
+
+                        // Get Bitmap Preview
+                        ImageView imageview = new ImageView(this);
+                        imageview.setImageBitmap(eBitmap);
+
+                        // previewView.removeView(imageview);
+                        previewView.addView(imageview, params);
+
+                        iris_pixel = calculateEyeCenter(eBitmap, mGradThresh, mDThresh);
+
+                        // Do Gaze Estimation
+                        if (eBitmap != null) {
+                            FaceLandmark leftEyeLandmark = face.getLandmark(FaceLandmark.LEFT_EYE);
+                            assert leftEyeLandmark != null;
+                            int cx = (int)leftEyeLandmark.getPosition().x;
+                            int cy = (int)leftEyeLandmark.getPosition().y;
+
+                            // Draw Circle on preview view
+                            int iris_X = (-iris_pixel%eBitmap.getWidth() + cx + (int)eyeRegionWidth/2);
+                            int iris_Y = (iris_pixel/eBitmap.getWidth() + cy - (int)eyeRegionHeight/2);
+                            PointF irispoint = new PointF(iris_X, iris_Y);
+                            faceView.setCircle(irispoint);
+
+                            // Remove the old TextView from the PreviewView overlay
+                            if (GazeDirection != null) {
+                                previewView.removeView(GazeDirection);
+                            }
+
+                            // Create a new LayoutParams object for the TextView
+                            FrameLayout.LayoutParams params2 = new FrameLayout.LayoutParams(
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                    FrameLayout.LayoutParams.WRAP_CONTENT
+                            );
+
+                            // Set the position of the TextView to the top center of the parent layout
+                            params2.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+
+                            // Set the size of the TextView
+                            params2.width = FrameLayout.LayoutParams.WRAP_CONTENT; // change this value to set the width of the TextView
+                            params2.height = FrameLayout.LayoutParams.WRAP_CONTENT; // change this value to set the height of the TextView
+
+                            String direction = "";
+                            GazeDirection = new TextView(this);
+                            GazeDirection.setTextSize(30);
+                            GazeDirection.setTextColor(Color.GREEN);
+                            int x_gaze = iris_pixel%eBitmap.getWidth() - eBitmap.getWidth()/2;
+                            int y_gaze = eBitmap.getHeight()/2 - iris_pixel/eBitmap.getWidth();
+                            if (x_gaze < mRightThreshold) { direction = "Right"; }
+                            if (x_gaze > mLeftThreshold) { direction = "Left"; }
+                            Log.e("EyePixelVector", "X: " + x_gaze + "  Y: " + y_gaze);
+                            GazeDirection.setText(String.format(direction));
+                            previewView.addView(GazeDirection, params2);
+                        }
+
+                        // Get the bounding box of the face
+                        RectF faceRect = new RectF(face.getBoundingBox());
+                        faceView.setFaceRect(faceRect);
+                        faceView.setFace(face);
+
+                        //eyeMovementTracking(face);
+                        eyePositionTracking(face);
+
+                        // Remove the view from its current parent, if it has one
+                        if (faceView.getParent() != null) {
+                            ((ViewGroup) faceView.getParent()).removeView(faceView);
+                        }
+                        // Add Face Drawing to Preview
+                        previewView.addView(faceView);

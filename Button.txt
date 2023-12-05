@@ -1,0 +1,9 @@
+    Button
+        androidid=@+idSetButton
+        androidlayout_width=wrap_content
+        androidlayout_height=wrap_content
+        androidlayout_marginBottom=30dp
+        androidtext=@stringset_position
+        applayout_constraintBottom_toBottomOf=parent
+        applayout_constraintEnd_toEndOf=parent
+        applayout_constraintStart_toStartOf=parent 

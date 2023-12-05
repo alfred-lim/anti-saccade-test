@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Antisaccade App</string>
+    <string name="open_camera">Open Camera</string>
+    <string name="RecordVideo">Record Video</string>
+    <string name="record">Record</string>
+    <string name="stop">STOP</string>
+    <string name="set_position">Set Position</string>
+</resources>
